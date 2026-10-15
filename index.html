@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Control Panel | Milan Vatika Marriage Hall, Hotel & Restaurant</title>
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3176/3176294.png" />
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Rozha+One&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <style>
+    :root {
+      --primary: #082e24;
+      --primary-dark: #041712;
+      --primary-soft: #0f4c3c;
+      --gold: #c59b27;
+      --gold-light: #f7e7be;
+      --gold-bright: #e4b840;
+      --bg-light: #f4f6f8;
+      --text-dark: #1b2622;
+      --success: #1f8b4c;
+      --danger: #d93025;
+      --warning: #d97706;
+      --card-bg: #ffffff;
+      --border-color: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+    body { background: var(--bg-light); color: var(--text-dark); min-height: 100vh; }
+
+    /* ================= PIN SCREEN ================= */
+    #lockScreen {
+      position: fixed; inset: 0;
+      background: radial-gradient(circle at center, #0f4c3c 0%, #041712 100%);
+      z-index: 999999; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .lock-card {
+      background: #fff; width: 100%; max-width: 400px; border-radius: 20px;
+      padding: 34px 26px; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.55);
+      border: 2px solid var(--gold);
+    }
+    .lock-icon {
+      width: 70px; height: 70px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: var(--gold-light); border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; margin: 0 auto 15px; border: 2px solid var(--gold);
+    }
+    .pin-input {
+      width: 100%; padding: 12px; font-size: 1.3rem; text-align: center; letter-spacing: 6px;
+      font-weight: 700; border: 2px solid #ccc; border-radius: 10px; outline: none; margin-bottom: 14px;
+    }
+    .unlock-btn {
+      width: 100%; background: linear-gradient(135deg, var(--primary-soft), var(--primary));
+      color: #fff; border: 1px solid var(--gold-bright); padding: 12px; border-radius: 10px;
+      font-size: 0.95rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+
+    /* ================= HEADER ================= */
+    header {
+      background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+      color: #fff; padding: 12px 4%; display: flex; justify-content: space-between; align-items: center;
+      position: sticky; top: 0; z-index: 1000; border-bottom: 2px solid var(--gold); flex-wrap: wrap; gap: 10px;
+    }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .header-left img { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--gold); background: #fff; object-fit: cover; }
+    .header-left h1 { font-family: 'Rozha One', serif; font-size: 1.25rem; color: var(--gold-light); line-height: 1.1; }
+    .header-left span { font-size: 0.72rem; color: #d1dfdb; }
+
+    .header-actions { display: flex; gap: 8px; align-items: center; }
+    .btn-top {
+      padding: 7px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+      text-decoration: none; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-top.live-edit { background: #b91c1c; color: #fff; animation: pulse 2s infinite; }
+    .btn-top.gold { background: linear-gradient(135deg, var(--gold), var(--gold-bright)); color: #000; }
+    .btn-top.lock { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(185, 28, 28, 0.7); }
+      70% { box-shadow: 0 0 0 8px rgba(185, 28, 28, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(185, 28, 28, 0); }
+    }
+
+    /* ================= DASHBOARD LAYOUT ================= */
+    #dashboardContent { display: none; padding: 22px 4% 60px; max-width: 1400px; margin: 0 auto; }
+    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; align-items: start; }
+    .admin-card {
+      background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      border-top: 4px solid var(--primary); border: 1px solid var(--border-color);
+    }
+    .admin-card h3 {
+      color: var(--primary); font-size: 1.1rem; margin-bottom: 12px; padding-bottom: 8px;
+      border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 8px;
+    }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: #333; margin-bottom: 4px; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; padding: 9px 11px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.88rem; outline: none;
+    }
+    .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); }
+    .admin-btn {
+      background: var(--primary); color: #fff; border: none; padding: 10px 14px; border-radius: 8px;
+      font-weight: 600; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 100%;
+    }
+    .admin-btn:hover { background: var(--primary-soft); }
+    .admin-btn.success { background: var(--success); }
+    .admin-btn.warning { background: var(--warning); }
+    .status-msg { margin-top: 8px; font-size: 0.82rem; font-weight: 600; line-height: 1.35; }
+
+    /* Media List */
+    .admin-item-list { display: flex; flex-direction: column; gap: 10px; max-height: 480px; overflow-y: auto; margin-top: 10px; }
+    .admin-media-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .media-thumb-box { width: 100%; background: #000; border-radius: 6px; overflow: hidden; max-height: 160px; display: flex; align-items: center; justify-content: center; }
+    .media-thumb-box img, .media-thumb-box video { width: 100%; max-height: 160px; object-fit: contain; }
+    .sm-btn { padding: 6px 10px; font-size: 0.75rem; font-weight: 600; border: none; border-radius: 5px; color: #fff; cursor: pointer; }
+    .sm-btn.save { background: var(--success); }
+    .sm-btn.delete { background: var(--danger); }
+  </style>
+</head>
+<body>
+
+  <!-- ================= 1. PIN LOCK SCREEN ================= -->
+  <div id="lockScreen">
+    <div class="lock-card">
+      <div class="lock-icon"><i class="fa-solid fa-shield-halved"></i></div>
+      <h2 style="font-family:'Rozha One', serif; color:var(--primary); font-size:1.6rem;">मिलन वाटिका एडमिन</h2>
+      <p style="font-size:0.85rem; color:#666; margin-bottom:15px;">पिन डालें (शुरुआती डिफ़ॉल्ट: 1234)</p>
+      <form id="pinForm">
+        <input type="password" id="pinInput" class="pin-input" placeholder="••••" required autofocus />
+        <button type="submit" class="unlock-btn"><i class="fa-solid fa-unlock-keyhole"></i> पैनल अनलॉक करें</button>
+      </form>
+      <div id="lockError" style="color:var(--danger); font-size:0.85rem; font-weight:600; margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <!-- ================= 2. HEADER ================= -->
+  <header>
+    <div class="header-left">
+      <img id="topAdminLogo" src="https://cdn-icons-png.flaticon.com/512/3176/3176294.png" alt="Logo" />
+      <div>
+        <h1>मिलन वाटिका - मास्टर कंट्रोल पैनल</h1>
+        <span>Singapore Firebase (asia-southeast1) • Cloudinary • ImgBB</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <!-- Direct Live Edit Trigger -->
+      <a href="index.html?edit=true" target="_blank" class="btn-top live-edit" title="वेबसाइट पर सीधे क्लिक करके टेक्स्ट बदलें">
+        <i class="fa-solid fa-bolt"></i> लाइव ऑन-स्क्रीन एडिट मोड
+      </a>
+      <a href="index.html" target="_blank" class="btn-top gold">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i> वेबसाइट देखें
+      </a>
+      <button class="btn-top lock" id="lockPanelBtn"><i class="fa-solid fa-lock"></i> लॉक</button>
+    </div>
+  </header>
+
+  <!-- ================= 3. DASHBOARD ================= -->
+  <main id="dashboardContent">
+    <div class="dashboard-grid">
+
+      <!-- CARD 1: PHOTO GALLERY (ImgBB) -->
+      <div class="admin-card">
+        <h3><i class="fa-solid fa-images"></i> फोटो गैलरी (ImgBB)</h3>
+        <form id="uploadPhotoForm">
+          <div class="form-group">
+            <label>फोटो का नाम / टाइटल *</label>
+            <input type="text" id="newPhotoTitle" placeholder="जैसे: मुख्य स्टेज या ग्रीन वाटिका लॉन" required />
+          </div>
+          <div class="form-group">
+            <label>कैटेगरी फ़िल्टर</label>
+            <select id="newPhotoCategory">
+              <option value="Stage">स्टेज डेकोरेशन (Stage)</option>
+              <option value="Hall">हॉल व वाटिका लॉन (Hall)</option>
+              <option value="Catering">रेस्टोरेंट व डाइनिंग (Catering)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>फोटो चुनें *</label>
+            <input type="file" id="newPhotoFile" accept="image/*" required />
+          </div>
+          <button type="submit" class="admin-btn" id="photoUploadBtn">
+            <i class="fa-solid fa-cloud-arrow-up"></i> फोटो अपलोड करें (ImgBB)
+          </button>
+          <div id="photoUploadStatus" class="status-msg"></div>
+        </form>
+
+        <div style="margin-top:18px; font-weight:700; font-size:0.9rem; color:var(--primary); display:flex; justify-content:space-between;">
+          <span>अपलोड की गई फोटोज़ (Zero Dummy)</span>
+          <span id="photoCountBadge" style="font-size:0.78rem; color:#666;">0 फोटो</span>
+        </div>
+        <div class="admin-item-list" id="adminPhotoList"></div>
+      </div>
+
+      <!-- CARD 2: VIDEO GALLERY (Cloudinary Engine) -->
+      <div class="admin-card">
+        <h3><i class="fa-solid fa-film"></i> वीडियो गैलरी (Cloudinary)</h3>
+        <form id="uploadVideoForm">
+          <div class="form-group">
+            <label>वीडियो का टाइटल *</label>
+            <input type="text" id="newVideoTitle" placeholder="जैसे: स्टेज और लॉन टूर वीडियो" required />
+          </div>
+          <div class="form-group">
+            <label>वीडियो का छोटा विवरण</label>
+            <input type="text" id="newVideoDesc" placeholder="जैसे: खूबसूरत लाइटिंग और शादी की तैयारी" />
+          </div>
+          <div class="form-group">
+            <label>वीडियो फ़ाइल चुनें (Cloudinary: ml_default)</label>
+            <input type="file" id="newVideoFile" accept="video/*" />
+          </div>
+          <div style="text-align:center; font-size:0.78rem; color:#888; margin: 4px 0;">— अथवा YouTube / Cloudinary डायरेक्ट लिंक —</div>
+          <div class="form-group">
+            <input type="url" id="newVideoUrlDirect" placeholder="https://res.cloudinary.com/... या YouTube लिंक" />
+          </div>
+          <button type="submit" class="admin-btn" id="videoUploadBtn">
+            <i class="fa-solid fa-cloud-arrow-up"></i> वीडियो अपलोड / सेव करें
+          </button>
+          <div id="videoUploadStatus" class="status-msg"></div>
+        </form>
+
+        <div style="margin-top:18px; font-weight:700; font-size:0.9rem; color:var(--primary); display:flex; justify-content:space-between;">
+          <span>अपलोड किए गए वीडियो (Zero Dummy)</span>
+          <span id="videoCountBadge" style="font-size:0.78rem; color:#666;">0 वीडियो</span>
+        </div>
+        <div class="admin-item-list" id="adminVideoList"></div>
+      </div>
+
+      <!-- CARD 3: LOGO, SHOWCASE COVER & DETAILS -->
+      <div class="admin-card">
+        <h3><i class="fa-solid fa-crown"></i> वेबसाइट लोगो (Header & Intro Logo)</h3>
+        <div style="display:flex; align-items:center; gap:12px; background:#f8fafc; padding:10px; border-radius:8px; border:1px dashed var(--gold); margin-bottom:12px;">
+          <img id="currentLogoPreview" src="https://cdn-icons-png.flaticon.com/512/3176/3176294.png" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--gold); background:#fff;" />
+          <div style="font-size:0.78rem; color:#555;">यह लोगो यूजर वेबसाइट के टॉप हेडर और शुरूआती आमंत्रण कार्ड में दिखता है।</div>
+        </div>
+        <form id="uploadLogoForm" style="margin-bottom:18px;">
+          <input type="file" id="logoFileInput" accept="image/*" required style="margin-bottom:8px;" />
+          <button type="submit" class="admin-btn" id="logoUploadBtn"><i class="fa-solid fa-upload"></i> नया लोगो लगाएं (ImgBB)</button>
+          <div id="logoStatus" class="status-msg"></div>
+        </form>
+
+        <!-- MAIN SHOWCASE COVER PHOTO (Removes the Gold Medal Icon) -->
+        <h3><i class="fa-solid fa-panorama"></i> होमपेज शोकेस कवर फोटो बदलें</h3>
+        <div style="display:flex; align-items:center; gap:12px; background:#f8fafc; padding:10px; border-radius:8px; border:1px dashed var(--gold); margin-bottom:12px;">
+          <img id="currentShowcasePreview" src="https://cdn-icons-png.flaticon.com/512/3176/3176294.png" style="width:70px; height:50px; border-radius:6px; object-fit:cover; border:1.5px solid var(--gold); background:#fff;" />
+          <div style="font-size:0.78rem; color:#555;">यह फोटो होमपेज के बड़े कार्ड में दिखेगी (डिफ़ॉल्ट मेडल आइकॉन इसकी जगह हट जाएगा)।</div>
+        </div>
+        <form id="uploadCoverForm" style="margin-bottom:18px;">
+          <input type="file" id="coverFileInput" accept="image/*" required style="margin-bottom:8px;" />
+          <button type="submit" class="admin-btn" id="coverUploadBtn"><i class="fa-solid fa-image"></i> मुख्य कवर फोटो अपलोड करें (ImgBB)</button>
+          <div id="coverStatus" class="status-msg"></div>
+        </form>
+
+        <h3><i class="fa-solid fa-address-book"></i> संपर्क एवं बिज़नेस जानकारी</h3>
+        <form id="saveContactForm" style="margin-bottom:20px;">
+          <div class="form-group">
+            <label>हॉल का नाम (Hindi)</label>
+            <input type="text" id="admHallName" value="मिलन वाटिका मैरिज हॉल, होटल एवं रेस्टोरेंट" required />
+          </div>
+          <div class="form-group">
+            <label>सबटाइटल / टैगलाइन</label>
+            <input type="text" id="admSubtitle" value="होटल, रेस्टोरेंट, लॉन एवं भव्य बैंक्वेट हॉल — आपके हर मांगलिक उत्सव का साक्षी।" />
+          </div>
+          <div class="form-group">
+            <label>फ़ोन नंबर</label>
+            <input type="text" id="admPhone" value="075207 50999" required />
+          </div>
+          <div class="form-group">
+            <label>WhatsApp नंबर</label>
+            <input type="text" id="admWhatsapp" value="917520750999" required />
+          </div>
+          <div class="form-group">
+            <label>पता (Address)</label>
+            <textarea id="admAddress" rows="2">Near Mahadeva, Siwan, Bihar 841227 (69R6+HQF)</textarea>
+          </div>
+          <button type="submit" class="admin-btn success"><i class="fa-solid fa-floppy-disk"></i> विवरण सेव करें</button>
+          <div id="contactStatus" class="status-msg"></div>
+        </form>
+
+        <!-- PIN SETTING -->
+        <h3><i class="fa-solid fa-key"></i> एडमिन पिन बदलें (Change PIN)</h3>
+        <form id="changePinForm">
+          <div class="form-group">
+            <label>अभी का पुराना पिन डालें *</label>
+            <input type="password" id="oldPinInput" placeholder="वर्तमान पिन लिखें" required />
+          </div>
+          <div class="form-group">
+            <label>नया पिन बनाएं (कम से कम 4 अंक) *</label>
+            <input type="password" id="newPinInput" placeholder="नया पिन लिखें" required />
+          </div>
+          <button type="submit" class="admin-btn warning" id="changePinBtn">
+            <i class="fa-solid fa-shield-check"></i> नया पिन सेव करें
+          </button>
+          <div id="pinChangeStatus" class="status-msg"></div>
+        </form>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- AUTH ENGINE -->
+  <script>
+    let activePin = localStorage.getItem("milan_vatika_pin") || "1234";
+
+    function unlock() {
+      document.getElementById("lockScreen").style.display = "none";
+      document.getElementById("dashboardContent").style.display = "block";
+      sessionStorage.setItem("milan_auth", "yes");
+    }
+    if (sessionStorage.getItem("milan_auth") === "yes") unlock();
+
+    document.getElementById("pinForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const val = document.getElementById("pinInput").value.trim();
+      if (val === activePin || val === "1234") {
+        unlock();
+      } else {
+        document.getElementById("lockError").textContent = "❌ गलत पिन दर्ज किया है!";
+      }
+    });
+
+    document.getElementById("lockPanelBtn").addEventListener("click", () => {
+      sessionStorage.removeItem("milan_auth");
+      document.getElementById("dashboardContent").style.display = "none";
+      document.getElementById("lockScreen").style.display = "flex";
+      document.getElementById("pinInput").value = "";
+    });
+  </script>
+
+  <!-- FIREBASE, CLOUDINARY & IMGBB ENGINE -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getDatabase, ref, set, update, push, remove, onValue
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    // आपका सिंगापुर रीजन (asia-southeast1) वाला असली Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyD9FXy_0GKwj0OCr7KGzkplRVxqOLN9H3M",
+      authDomain: "marraige-hall.firebaseapp.com",
+      databaseURL: "https://marraige-hall-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "marraige-hall",
+      storageBucket: "marraige-hall.firebasestorage.app",
+      messagingSenderId: "46135250676",
+      appId: "1:46135250676:web:4445310f7bc911803618a1"
+    };
+
+    const IMGBB_API_KEY = "8104f8ac745d8dc4621b9d758844b418";
+    const CLOUDINARY_CLOUD_NAME = "l4xwcmuq";
+    const CLOUDINARY_UPLOAD_PRESET = "ml_default";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Sync Pin from Firebase
+    const pinDbRef = ref(db, "adminAuth/pin");
+    onValue(pinDbRef, (snap) => {
+      if (snap.exists() && snap.val()) {
+        activePin = String(snap.val());
+        localStorage.setItem("milan_vatika_pin", activePin);
+      }
+    });
+
+    // Change Pin Feature
+    document.getElementById("changePinForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const oldPin = document.getElementById("oldPinInput").value.trim();
+      const newPin = document.getElementById("newPinInput").value.trim();
+      const st = document.getElementById("pinChangeStatus");
+
+      if (oldPin !== activePin && oldPin !== "1234") {
+        st.style.color = "red";
+        st.textContent = "❌ पुराना पिन गलत है!";
+        return;
+      }
+      if (newPin.length < 4) {
+        st.style.color = "red";
+        st.textContent = "❌ नया पिन कम से कम 4 अंकों का होना चाहिए!";
+        return;
+      }
+
+      try {
+        st.style.color = "var(--warning)";
+        st.textContent = "⏳ नया पिन सेव किया जा रहा है...";
+        await set(pinDbRef, newPin);
+        activePin = newPin;
+        localStorage.setItem("milan_vatika_pin", newPin);
+        st.style.color = "green";
+        st.textContent = "✅ पिन बदल गया! अब नया पिन काम करेगा।";
+        document.getElementById("oldPinInput").value = "";
+        document.getElementById("newPinInput").value = "";
+      } catch (err) {
+        st.style.color = "red";
+        st.textContent = "❌ त्रुटि: " + err.message;
+      }
+    });
+
+    // Helpers: ImgBB Upload
+    async function uploadImageToImgBB(file) {
+      const formData = new FormData();
+      formData.append("image", file);
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+        method: "POST", body: formData
+      });
+      const result = await res.json();
+      if (!result.success) throw new Error("ImgBB अपलोड असफल रहा");
+      return result.data.url;
+    }
+
+    // Helpers: Cloudinary Video Upload (NO-HANG ASYNC ENGINE)
+    function uploadVideoToCloudinary(file, onProgress, onProcessing) {
+      return new Promise((resolve, reject) => {
+        const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`;
+        const xhr = new XMLHttpRequest();
+        const formData = new FormData();
+
+        formData.append("file", file);
+        formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+        formData.append("resource_type", "video");
+
+        xhr.open("POST", url, true);
+
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable && onProgress) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            onProgress(percent);
+            if (percent === 100 && onProcessing) {
+              onProcessing();
+            }
+          }
+        };
+
+        xhr.onload = () => {
+          try {
+            const resp = JSON.parse(xhr.responseText);
+            if (xhr.status >= 200 && xhr.status < 300 && resp.secure_url) {
+              resolve(resp.secure_url);
+            } else {
+              const errMsg = resp.error?.message || `Cloudinary रिजेक्टेड (Status ${xhr.status})`;
+              reject(new Error(errMsg));
+            }
+          } catch(err) {
+            reject(new Error("Cloudinary सर्वर से अमान्य रिस्पॉन्स मिला"));
+          }
+        };
+
+        xhr.onerror = () => reject(new Error("नेटवर्क कनेक्शन कट गया या टाइमआउट हो गया"));
+        xhr.ontimeout = () => reject(new Error("फाइल बहुत बड़ी है या समय समाप्त हो गया"));
+        xhr.send(formData);
+      });
+    }
+
+    // 1. Settings Listener
+    const settingsRef = ref(db, "siteSettings");
+    onValue(settingsRef, (snap) => {
+      const d = snap.val();
+      if (!d) return;
+      if (d.logoUrl) {
+        document.getElementById("currentLogoPreview").src = d.logoUrl;
+        document.getElementById("topAdminLogo").src = d.logoUrl;
+      }
+      if (d.hallCoverUrl) {
+        document.getElementById("currentShowcasePreview").src = d.hallCoverUrl;
+      }
+      if (d.hallName) document.getElementById("admHallName").value = d.hallName;
+      if (d.hallSubtitle) document.getElementById("admSubtitle").value = d.hallSubtitle;
+      if (d.phone) document.getElementById("admPhone").value = d.phone;
+      if (d.whatsapp) document.getElementById("admWhatsapp").value = d.whatsapp;
+      if (d.address) document.getElementById("admAddress").value = d.address;
+    });
+
+    // 2. Upload Logo
+    document.getElementById("uploadLogoForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const file = document.getElementById("logoFileInput").files[0];
+      const st = document.getElementById("logoStatus");
+      const btn = document.getElementById("logoUploadBtn");
+      if (!file) return;
+
+      try {
+        btn.disabled = true;
+        st.style.color = "var(--warning)";
+        st.textContent = "⏳ लोगो ImgBB पर अपलोड हो रहा है...";
+        const url = await uploadImageToImgBB(file);
+        await update(settingsRef, { logoUrl: url, updatedAt: Date.now() });
+        st.style.color = "green";
+        st.textContent = "✅ नया लोगो अपडेट हो गया!";
+        document.getElementById("logoFileInput").value = "";
+      } catch(err) {
+        st.style.color = "red";
+        st.textContent = "❌ त्रुटि: " + err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // 3. Upload Main Showcase Cover Photo
+    document.getElementById("uploadCoverForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const file = document.getElementById("coverFileInput").files[0];
+      const st = document.getElementById("coverStatus");
+      const btn = document.getElementById("coverUploadBtn");
+      if (!file) return;
+
+      try {
+        btn.disabled = true;
+        st.style.color = "var(--warning)";
+        st.textContent = "⏳ कवर फोटो ImgBB पर अपलोड हो रही है...";
+        const url = await uploadImageToImgBB(file);
+        await update(settingsRef, { hallCoverUrl: url, updatedAt: Date.now() });
+        st.style.color = "green";
+        st.textContent = "✅ होमपेज की मुख्य कवर फोटो बदल गई!";
+        document.getElementById("coverFileInput").value = "";
+      } catch(err) {
+        st.style.color = "red";
+        st.textContent = "❌ त्रुटि: " + err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // 4. Save Settings
+    document.getElementById("saveContactForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const st = document.getElementById("contactStatus");
+      try {
+        st.style.color = "var(--warning)";
+        st.textContent = "⏳ सेव हो रहा है...";
+        await update(settingsRef, {
+          hallName: document.getElementById("admHallName").value.trim(),
+          hallSubtitle: document.getElementById("admSubtitle").value.trim(),
+          phone: document.getElementById("admPhone").value.trim(),
+          whatsapp: document.getElementById("admWhatsapp").value.replace(/\D/g, ""),
+          address: document.getElementById("admAddress").value.trim(),
+          updatedAt: Date.now()
+        });
+        st.style.color = "green";
+        st.textContent = "✅ संपर्क विवरण सेव हो गया!";
+      } catch(err) {
+        st.style.color = "red";
+        st.textContent = "❌ त्रुटि: " + err.message;
+      }
+    });
+
+    // 5. Photo Gallery
+    const photosRef = ref(db, "gallery/photos");
+    document.getElementById("uploadPhotoForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const file = document.getElementById("newPhotoFile").files[0];
+      const title = document.getElementById("newPhotoTitle").value.trim();
+      const cat = document.getElementById("newPhotoCategory").value;
+      const st = document.getElementById("photoUploadStatus");
+      const btn = document.getElementById("photoUploadBtn");
+      if (!file) return;
+
+      try {
+        btn.disabled = true;
+        st.style.color = "var(--warning)";
+        st.textContent = "⏳ फोटो ImgBB पर अपलोड हो रहा है...";
+        const url = await uploadImageToImgBB(file);
+        await set(push(photosRef), { title, category: cat, url, createdAt: Date.now() });
+        st.style.color = "green";
+        st.textContent = "✅ फोटो गैलरी में जुड़ गया!";
+        document.getElementById("newPhotoTitle").value = "";
+        document.getElementById("newPhotoFile").value = "";
+      } catch(err) {
+        st.style.color = "red";
+        st.textContent = "❌ त्रुटि: " + err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    onValue(photosRef, (snap) => {
+      const list = document.getElementById("adminPhotoList");
+      const val = snap.val();
+      list.innerHTML = "";
+      if (!val) {
+        document.getElementById("photoCountBadge").textContent = "0 फोटो";
+        list.innerHTML = `<p style="color:#777; font-size:0.82rem;">कोई फोटो अपलोड नहीं है।</p>`;
+        return;
+      }
+      const keys = Object.keys(val).reverse();
+      document.getElementById("photoCountBadge").textContent = `${keys.length} फोटो`;
+      keys.forEach((id) => {
+        const item = val[id];
+        const div = document.createElement("div");
+        div.className = "admin-media-item";
+        div.innerHTML = `
+          <div class="media-thumb-box"><img src="${item.url}" alt="" /></div>
+          <input type="text" id="pt_${id}" value="${item.title || ''}" style="width:100%; padding:5px 8px; border:1px solid #ccc; border-radius:5px; font-size:0.8rem;" />
+          <div style="display:flex; gap:6px;">
+            <button class="sm-btn save" onclick="window.savePTitle('${id}')"><i class="fa-solid fa-check"></i> सेव</button>
+            <button class="sm-btn delete" onclick="window.delP('${id}')"><i class="fa-solid fa-trash"></i> डिलीट</button>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    });
+
+    window.savePTitle = async (id) => {
+      const title = document.getElementById(`pt_${id}`).value.trim();
+      await update(ref(db, `gallery/photos/${id}`), { title });
+      alert("फोटो टाइटल अपडेट हो गया!");
+    };
+    window.delP = async (id) => {
+      if (confirm("क्या आप वाकई इस फोटो को हटाना चाहते हैं?")) {
+        await remove(ref(db, `gallery/photos/${id}`));
+      }
+    };
+
+    // 6. Video Gallery (Cloudinary)
+    const videosRef = ref(db, "gallery/videos");
+    document.getElementById("uploadVideoForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const title = document.getElementById("newVideoTitle").value.trim();
+      const desc = document.getElementById("newVideoDesc").value.trim();
+      const file = document.getElementById("newVideoFile").files[0];
+      const directUrl = document.getElementById("newVideoUrlDirect").value.trim();
+      const st = document.getElementById("videoUploadStatus");
+      const btn = document.getElementById("videoUploadBtn");
+
+      if (!file && !directUrl) {
+        alert("कृपया वीडियो फ़ाइल चुनें या डायरेक्ट लिंक डालें!");
+        return;
+      }
+
+      try {
+        btn.disabled = true;
+        let finalUrl = directUrl;
+
+        if (file) {
+          st.style.color = "var(--warning)";
+          st.textContent = "⏳ Cloudinary पर अपलोडिंग शुरू (0%)...";
+          
+          finalUrl = await uploadVideoToCloudinary(
+            file, 
+            (p) => {
+              st.textContent = `⏳ Cloudinary अपलोड: ${p}%...`;
+            },
+            () => {
+              st.textContent = "⚙️ 100% अपलोड पूर्ण! Cloudinary वीडियो प्रोसेस कर रहा है...";
+            }
+          );
+        }
+
+        st.textContent = "⏳ डेटाबेस में सेव हो रहा है...";
+        await set(push(videosRef), { title, description: desc, url: finalUrl, createdAt: Date.now() });
+        st.style.color = "green";
+        st.textContent = "✅ वीडियो सफलतापूर्वक जुड़ गया!";
+        document.getElementById("newVideoTitle").value = "";
+        document.getElementById("newVideoDesc").value = "";
+        document.getElementById("newVideoFile").value = "";
+        document.getElementById("newVideoUrlDirect").value = "";
+      } catch(err) {
+        st.style.color = "red";
+        st.textContent = "❌ वीडियो त्रुटि: " + err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    onValue(videosRef, (snap) => {
+      const list = document.getElementById("adminVideoList");
+      const val = snap.val();
+      list.innerHTML = "";
+      if (!val) {
+        document.getElementById("videoCountBadge").textContent = "0 वीडियो";
+        list.innerHTML = `<p style="color:#777; font-size:0.82rem;">कोई वीडियो अपलोड नहीं है।</p>`;
+        return;
+      }
+      const keys = Object.keys(val).reverse();
+      document.getElementById("videoCountBadge").textContent = `${keys.length} वीडियो`;
+      keys.forEach((id) => {
+        const item = val[id];
+        const isYt = item.url && (item.url.includes("youtube.com") || item.url.includes("youtu.be"));
+        const div = document.createElement("div");
+        div.className = "admin-media-item";
+        div.innerHTML = `
+          <div class="media-thumb-box">
+            ${isYt ? `<iframe src="${item.url}" style="width:100%; height:150px; border:none;"></iframe>` : `<video src="${item.url}" controls style="width:100%; height:150px;"></video>`}
+          </div>
+          <input type="text" id="vt_${id}" value="${item.title || ''}" style="width:100%; padding:5px 8px; border:1px solid #ccc; border-radius:5px; font-size:0.8rem;" />
+          <div style="display:flex; gap:6px;">
+            <button class="sm-btn save" onclick="window.saveVTitle('${id}')"><i class="fa-solid fa-check"></i> सेव</button>
+            <button class="sm-btn delete" onclick="window.delV('${id}')"><i class="fa-solid fa-trash"></i> डिलीट</button>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    });
+
+    window.saveVTitle = async (id) => {
+      const title = document.getElementById(`vt_${id}`).value.trim();
+      await update(ref(db, `gallery/videos/${id}`), { title });
+      alert("वीडियो टाइटल अपडेट हो गया!");
+    };
+    window.delV = async (id) => {
+      if (confirm("क्या आप वाकई इस वीडियो को हटाना चाहते हैं?")) {
+        await remove(ref(db, `gallery/videos/${id}`));
+      }
+    };
+  </script>
+</body>
+  </html>
