@@ -142,7 +142,7 @@
       <img id="topAdminLogo" src="https://cdn-icons-png.flaticon.com/512/3176/3176294.png" alt="Logo" />
       <div>
         <h1>मिलन वाटिका - मास्टर कंट्रोल पैनल</h1>
-        <span>Singapore Firebase (asia-southeast1) • Cloudinary • ImgBB</span>
+        <span>Singapore Firebase (asia-southeast1) • Cloudinary Media Control</span>
       </div>
     </div>
     <div class="header-actions">
@@ -161,9 +161,9 @@
   <main id="dashboardContent">
     <div class="dashboard-grid">
 
-      <!-- CARD 1: PHOTO GALLERY (ImgBB) -->
+      <!-- CARD 1: PHOTO GALLERY (Cloudinary Fast Upload) -->
       <div class="admin-card">
-        <h3><i class="fa-solid fa-images"></i> फोटो गैलरी (ImgBB)</h3>
+        <h3><i class="fa-solid fa-images"></i> फोटो गैलरी (Cloudinary Fast API)</h3>
         <form id="uploadPhotoForm">
           <div class="form-group">
             <label>फोटो का नाम / टाइटल *</label>
@@ -182,7 +182,7 @@
             <input type="file" id="newPhotoFile" accept="image/*" required />
           </div>
           <button type="submit" class="admin-btn" id="photoUploadBtn">
-            <i class="fa-solid fa-cloud-arrow-up"></i> फोटो अपलोड करें (ImgBB)
+            <i class="fa-solid fa-cloud-arrow-up"></i> फोटो अपलोड करें (Cloudinary)
           </button>
           <div id="photoUploadStatus" class="status-msg"></div>
         </form>
@@ -227,7 +227,7 @@
         <div class="admin-item-list" id="adminVideoList"></div>
       </div>
 
-      <!-- CARD 3: LOGO, SHOWCASE COVER & DETAILS -->
+      <!-- CARD 3: LOGO, SHOWCASE COVER & DETAILS (Cloudinary) -->
       <div class="admin-card">
         <h3><i class="fa-solid fa-crown"></i> वेबसाइट लोगो (Header & Intro Logo)</h3>
         <div style="display:flex; align-items:center; gap:12px; background:#f8fafc; padding:10px; border-radius:8px; border:1px dashed var(--gold); margin-bottom:12px;">
@@ -236,19 +236,19 @@
         </div>
         <form id="uploadLogoForm" style="margin-bottom:18px;">
           <input type="file" id="logoFileInput" accept="image/*" required style="margin-bottom:8px;" />
-          <button type="submit" class="admin-btn" id="logoUploadBtn"><i class="fa-solid fa-upload"></i> नया लोगो लगाएं (ImgBB)</button>
+          <button type="submit" class="admin-btn" id="logoUploadBtn"><i class="fa-solid fa-upload"></i> नया लोगो लगाएं (Cloudinary)</button>
           <div id="logoStatus" class="status-msg"></div>
         </form>
 
-        <!-- MAIN SHOWCASE COVER PHOTO (Removes the Gold Medal Icon) -->
+        <!-- MAIN SHOWCASE COVER PHOTO -->
         <h3><i class="fa-solid fa-panorama"></i> होमपेज शोकेस कवर फोटो बदलें</h3>
         <div style="display:flex; align-items:center; gap:12px; background:#f8fafc; padding:10px; border-radius:8px; border:1px dashed var(--gold); margin-bottom:12px;">
           <img id="currentShowcasePreview" src="https://cdn-icons-png.flaticon.com/512/3176/3176294.png" style="width:70px; height:50px; border-radius:6px; object-fit:cover; border:1.5px solid var(--gold); background:#fff;" />
-          <div style="font-size:0.78rem; color:#555;">यह फोटो होमपेज के बड़े कार्ड में दिखेगी (डिफ़ॉल्ट मेडल आइकॉन इसकी जगह हट जाएगा)।</div>
+          <div style="font-size:0.78rem; color:#555;">यह फोटो होमपेज के बड़े कार्ड में दिखेगी।</div>
         </div>
         <form id="uploadCoverForm" style="margin-bottom:18px;">
           <input type="file" id="coverFileInput" accept="image/*" required style="margin-bottom:8px;" />
-          <button type="submit" class="admin-btn" id="coverUploadBtn"><i class="fa-solid fa-image"></i> मुख्य कवर फोटो अपलोड करें (ImgBB)</button>
+          <button type="submit" class="admin-btn" id="coverUploadBtn"><i class="fa-solid fa-image"></i> मुख्य कवर फोटो अपलोड करें (Cloudinary)</button>
           <div id="coverStatus" class="status-msg"></div>
         </form>
 
@@ -328,7 +328,7 @@
     });
   </script>
 
-  <!-- FIREBASE, CLOUDINARY & IMGBB ENGINE -->
+  <!-- FIREBASE & CLOUDINARY ENGINE -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import {
@@ -346,7 +346,7 @@
       appId: "1:46135250676:web:4445310f7bc911803618a1"
     };
 
-    const IMGBB_API_KEY = "8104f8ac745d8dc4621b9d758844b418";
+    // Cloudinary Configuration (फोटो व वीडियो दोनों के लिए 100% Unsigned)
     const CLOUDINARY_CLOUD_NAME = "l4xwcmuq";
     const CLOUDINARY_UPLOAD_PRESET = "ml_default";
 
@@ -396,19 +396,26 @@
       }
     });
 
-    // Helpers: ImgBB Upload
-    async function uploadImageToImgBB(file) {
+    // Cloudinary Image Upload Engine (Zero CORS, Zero Limit Block)
+    async function uploadImageToCloudinary(file) {
+      const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
       const formData = new FormData();
-      formData.append("image", file);
-      const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-        method: "POST", body: formData
+      formData.append("file", file);
+      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+      const res = await fetch(url, {
+        method: "POST",
+        body: formData
       });
-      const result = await res.json();
-      if (!result.success) throw new Error("ImgBB अपलोड असफल रहा");
-      return result.data.url;
+      const data = await res.json();
+      if (data.secure_url) {
+        return data.secure_url;
+      } else {
+        throw new Error(data.error?.message || "Cloudinary पर फोटो अपलोड नहीं हो सका");
+      }
     }
 
-    // Helpers: Cloudinary Video Upload (NO-HANG ASYNC ENGINE)
+    // Cloudinary Video Upload Engine (NO-HANG ASYNC ENGINE)
     function uploadVideoToCloudinary(file, onProgress, onProcessing) {
       return new Promise((resolve, reject) => {
         const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`;
@@ -470,7 +477,7 @@
       if (d.address) document.getElementById("admAddress").value = d.address;
     });
 
-    // 2. Upload Logo
+    // 2. Upload Logo (via Cloudinary)
     document.getElementById("uploadLogoForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const file = document.getElementById("logoFileInput").files[0];
@@ -481,8 +488,8 @@
       try {
         btn.disabled = true;
         st.style.color = "var(--warning)";
-        st.textContent = "⏳ लोगो ImgBB पर अपलोड हो रहा है...";
-        const url = await uploadImageToImgBB(file);
+        st.textContent = "⏳ लोगो Cloudinary पर अपलोड हो रहा है...";
+        const url = await uploadImageToCloudinary(file);
         await update(settingsRef, { logoUrl: url, updatedAt: Date.now() });
         st.style.color = "green";
         st.textContent = "✅ नया लोगो अपडेट हो गया!";
@@ -495,7 +502,7 @@
       }
     });
 
-    // 3. Upload Main Showcase Cover Photo
+    // 3. Upload Main Showcase Cover Photo (via Cloudinary)
     document.getElementById("uploadCoverForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const file = document.getElementById("coverFileInput").files[0];
@@ -506,8 +513,8 @@
       try {
         btn.disabled = true;
         st.style.color = "var(--warning)";
-        st.textContent = "⏳ कवर फोटो ImgBB पर अपलोड हो रही है...";
-        const url = await uploadImageToImgBB(file);
+        st.textContent = "⏳ कवर फोटो Cloudinary पर अपलोड हो रही है...";
+        const url = await uploadImageToCloudinary(file);
         await update(settingsRef, { hallCoverUrl: url, updatedAt: Date.now() });
         st.style.color = "green";
         st.textContent = "✅ होमपेज की मुख्य कवर फोटो बदल गई!";
@@ -543,7 +550,7 @@
       }
     });
 
-    // 5. Photo Gallery
+    // 5. Photo Gallery (via Cloudinary)
     const photosRef = ref(db, "gallery/photos");
     document.getElementById("uploadPhotoForm").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -557,8 +564,8 @@
       try {
         btn.disabled = true;
         st.style.color = "var(--warning)";
-        st.textContent = "⏳ फोटो ImgBB पर अपलोड हो रहा है...";
-        const url = await uploadImageToImgBB(file);
+        st.textContent = "⏳ फोटो Cloudinary पर अपलोड हो रहा है...";
+        const url = await uploadImageToCloudinary(file);
         await set(push(photosRef), { title, category: cat, url, createdAt: Date.now() });
         st.style.color = "green";
         st.textContent = "✅ फोटो गैलरी में जुड़ गया!";
@@ -703,4 +710,4 @@
     };
   </script>
 </body>
-  </html>
+</html>
